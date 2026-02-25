@@ -27,6 +27,15 @@ pub fn encode(config: &DeepLinkConfig) -> Result<String> {
     encode::encode(config)
 }
 
+/// Encode a configuration into a Unicode-string QR code that contains a deep-link URI.
+///
+/// # Errors
+///
+/// Returns `DeepLinkError` if encoding fails.
+pub fn encode_to_qr(config: &DeepLinkConfig) -> Result<String> {
+    encode::encode_to_qr(config)
+}
+
 /// Decode a deep-link URI into a configuration.
 ///
 /// # Errors
@@ -44,6 +53,7 @@ mod tests {
     fn test_lib_exports() {
         // Verify main types are exported
         let _: fn(&DeepLinkConfig) -> Result<String> = encode;
+        let _: fn(&DeepLinkConfig) -> Result<String> = encode_to_qr;
         let _: fn(&str) -> Result<DeepLinkConfig> = decode;
     }
 }

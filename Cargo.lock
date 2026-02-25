@@ -2231,6 +2231,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "qrcode"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "166f136dfdb199f98186f3649cf7a0536534a61417a1a30221b492b4fb60ce3f"
+
+[[package]]
 name = "quiche"
 version = "0.24.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3561,6 +3567,7 @@ dependencies = [
  "base64 0.21.7",
  "hex",
  "proptest",
+ "qrcode",
  "rand 0.10.0",
  "rustls-pemfile",
  "serde",

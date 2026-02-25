@@ -133,9 +133,9 @@ fn main() {
                 .requires(CLIENT_CONFIG_PARAM_NAME)
                 .short('f')
                 .long("format")
-                .value_parser(["toml", "deeplink"])
+                .value_parser(["toml", "deeplink", "deeplink-qr"])
                 .default_value("deeplink")
-                .help("Output format for client configuration: 'deeplink' produces tt:// URI, 'toml' produces traditional config file")
+                .help("Output format for client configuration: 'deeplink' produces tt:// URI, 'toml' produces traditional config file, 'deeplink-qr' produces QR-code that contains tt:// URI")
         ])
         .disable_version_flag(true)
         .get_matches();
@@ -295,6 +295,13 @@ fn main() {
                 Ok(deep_link) => println!("{}", deep_link),
                 Err(e) => {
                     eprintln!("Error generating deep-link: {}", e);
+                    std::process::exit(1);
+                }
+            },
+            "deeplink-qr" => match client_config.compose_qrcode() {
+                Ok(unicode_qrcode) => println!("{unicode_qrcode}"),
+                Err(e) => {
+                    eprintln!("Error generating QR code: {}", e);
                     std::process::exit(1);
                 }
             },

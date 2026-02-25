@@ -16,7 +16,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-trusttunnel-deeplink = { git = "https://github.com/TrustTunnel/TrustTunnel/deeplink" }
+trusttunnel-deeplink = { git = "https://github.com/TrustTunnel/TrustTunnel/" }
 ```
 
 ## Quick Start

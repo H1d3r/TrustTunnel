@@ -7,6 +7,7 @@ use macros::{Getter, RuntimeDoc};
 use once_cell::sync::Lazy;
 use std::net::SocketAddr;
 use toml_edit::{value, Document};
+use trusttunnel_deeplink::DeepLinkConfig;
 
 pub fn build(
     client: &String,
@@ -101,9 +102,8 @@ impl ClientConfig {
         doc.to_string()
     }
 
-    /// Generate a deep-link URI (tt://) for this client configuration.
-    pub fn compose_deeplink(&self) -> std::io::Result<String> {
-        use trusttunnel_deeplink::{DeepLinkConfig, Protocol};
+    fn compose_config(&self) -> std::io::Result<DeepLinkConfig> {
+        use trusttunnel_deeplink::Protocol;
 
         // Convert certificate from PEM to DER if needed
         let certificate = if !self.cert_is_system_verifiable && !self.certificate.is_empty() {
@@ -122,7 +122,7 @@ impl ClientConfig {
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidInput, e))?;
 
         // Build deep-link config
-        let config = DeepLinkConfig {
+        Ok(DeepLinkConfig {
             hostname: self.hostname.clone(),
             addresses: self.addresses.clone(),
             username: self.username.clone(),
@@ -142,9 +142,22 @@ impl ClientConfig {
             certificate,
             upstream_protocol,
             anti_dpi: self.anti_dpi,
-        };
+        })
+    }
+
+    /// Generate a deep-link URI (tt://) for this client configuration.
+    pub fn compose_deeplink(&self) -> std::io::Result<String> {
+        let config = self.compose_config()?;
 
         trusttunnel_deeplink::encode(&config)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+    }
+
+    /// Generate a QR-code that contains a deep-link URI
+    pub fn compose_qrcode(&self) -> std::io::Result<String> {
+        let config = self.compose_config()?;
+
+        trusttunnel_deeplink::encode_to_qr(&config)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
     }
 }

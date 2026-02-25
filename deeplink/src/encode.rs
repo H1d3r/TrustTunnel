@@ -2,6 +2,8 @@ use crate::error::Result;
 use crate::types::{DeepLinkConfig, Protocol, TlvTag};
 use crate::varint::encode_varint;
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+use qrcode::render::unicode;
+use qrcode::QrCode;
 
 /// Encode a Tag-Length-Value entry.
 fn encode_tlv(tag: TlvTag, value: &[u8]) -> Result<Vec<u8>> {
@@ -96,6 +98,19 @@ pub fn encode(config: &DeepLinkConfig) -> Result<String> {
     let payload = encode_tlv_payload(config)?;
     let encoded = encode_base64url(&payload);
     Ok(format!("tt://{}", encoded))
+}
+
+/// Encode a configuration into a Unicode-string QR code that contains a deep-link URI.
+pub fn encode_to_qr(config: &DeepLinkConfig) -> Result<String> {
+    let payload = encode_tlv_payload(config)?;
+    let encoded = encode_base64url(&payload);
+    let code = QrCode::new(encoded.as_bytes()).unwrap();
+
+    Ok(code
+        .render::<unicode::Dense1x2>()
+        .min_dimensions(10, 10)
+        .quiet_zone(true)
+        .build())
 }
 
 #[cfg(test)]
@@ -202,5 +217,20 @@ mod tests {
 
         assert!(uri.starts_with("tt://"));
         assert!(!uri.contains('='));
+    }
+
+    #[test]
+    fn test_encode_qr() {
+        let config = DeepLinkConfig::builder()
+            .hostname("vpn.example.com".to_string())
+            .addresses(vec!["1.2.3.4:4443".parse().unwrap()])
+            .username("alice".to_string())
+            .password("secret".to_string())
+            .build()
+            .unwrap();
+
+        let qr_code_string = encode_to_qr(&config).unwrap();
+
+        assert!(!qr_code_string.is_empty());
     }
 }
