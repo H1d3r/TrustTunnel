@@ -190,10 +190,6 @@ pub struct Settings {
     /// Optional path prefix for speedtest requests on main hosts.
     #[serde(default)]
     pub(crate) speedtest_path: Option<String>,
-    /// Allow tunnel requests without a token (legacy compatibility).
-    #[serde(default = "Settings::default_allow_without_token")]
-    pub(crate) allow_without_token: bool,
-
     /// Default maximum number of simultaneous HTTP/1 and HTTP/2 connections per client credentials.
     /// TrustTunnel clients open 8 HTTP/2 connections by default, so set this to
     /// `8 * <max_devices>` to limit the number of simultaneously connected devices.
@@ -574,10 +570,6 @@ impl Settings {
         false
     }
 
-    pub fn default_allow_without_token() -> bool {
-        true
-    }
-
     fn validate_request_path(name: &str, path: &Option<String>) -> Result<(), ValidationError> {
         if let Some(path) = path {
             if path.is_empty() || !path.starts_with('/') {
@@ -601,7 +593,6 @@ impl Settings {
         }
         Ok(())
     }
-
 }
 
 #[cfg(test)]
@@ -631,7 +622,6 @@ impl Default for Settings {
             ping_enable: Settings::default_ping_enable(),
             ping_path: None,
             speedtest_path: None,
-            allow_without_token: Settings::default_allow_without_token(),
             default_max_http2_conns_per_client: None,
             default_max_http3_conns_per_client: None,
             built: false,
@@ -891,7 +881,6 @@ impl SettingsBuilder {
                 ping_enable: Settings::default_ping_enable(),
                 ping_path: None,
                 speedtest_path: None,
-                allow_without_token: Settings::default_allow_without_token(),
                 default_max_http2_conns_per_client: None,
                 default_max_http3_conns_per_client: None,
                 built: true,
@@ -1042,12 +1031,6 @@ impl SettingsBuilder {
     /// Set path prefix for speedtest requests on main hosts
     pub fn speedtest_path<S: Into<String>>(mut self, path: S) -> Self {
         self.settings.speedtest_path = Some(path.into());
-        self
-    }
-
-    /// Allow tunnel requests without a token
-    pub fn allow_without_token(mut self, x: bool) -> Self {
-        self.settings.allow_without_token = x;
         self
     }
 }

@@ -308,10 +308,7 @@ fn run_proxy_chunked() -> (SocketAddr, impl Future<Output = ()>) {
         info!("New connection from {}", peer);
         hyper::server::conn::Http::new()
             .http1_only(true)
-            .serve_connection(
-                socket,
-                hyper::service::service_fn(request_handler_chunked),
-            )
+            .serve_connection(socket, hyper::service::service_fn(request_handler_chunked))
             .await
             .unwrap();
     })

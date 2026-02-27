@@ -293,11 +293,7 @@ async fn handle_stream(
         loop {
             // Ensure we have a full chunk size line.
             let line_end = loop {
-                if let Some(pos) = buffer
-                    .windows(2)
-                    .position(|w| w == b"\r\n")
-                    .map(|p| p + 2)
-                {
+                if let Some(pos) = buffer.windows(2).position(|w| w == b"\r\n").map(|p| p + 2) {
                     break pos;
                 }
                 let eof = need_more(&mut buffer, &mut server_source, log_id).await?;
@@ -331,10 +327,8 @@ async fn handle_stream(
                 }
                 if buffer_for_length && client_sink.is_none() {
                     if let Some(resp) = response_opt.as_mut() {
-                        resp.headers.insert(
-                            http::header::CONTENT_LENGTH,
-                            buffered_body.len().into(),
-                        );
+                        resp.headers
+                            .insert(http::header::CONTENT_LENGTH, buffered_body.len().into());
                     }
                     ensure_client_sink(&mut response_opt, &mut respond_opt, &mut client_sink)?;
                     if let Some(sink) = client_sink.as_mut() {
