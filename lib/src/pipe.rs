@@ -149,6 +149,7 @@ impl<F: Fn(SimplexDirection, usize) + Send> SimplexPipe<F> {
             self.last_activity = Instant::now();
 
             let future = async {
+                self.sink.flush().await?;
                 if self.pending_chunk.is_none() {
                     let x = self.source.read().await?;
                     log_dir!(trace, self.source.id(), self.direction, "TCP data: {}", x);
