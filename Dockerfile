@@ -11,6 +11,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --defau
 ENV PATH="/root/.cargo/bin:$PATH"
 # Copy source files
 WORKDIR $ENDPOINT_DIR_NAME
+COPY deeplink/ ./deeplink
 COPY endpoint/ ./endpoint
 COPY lib/ ./lib
 COPY macros/ ./macros
@@ -21,14 +22,23 @@ RUN make endpoint/build
 RUN make endpoint/build-wizard
 
 # Copy binaries
-FROM debian AS trusttunnel-endpoint
+FROM debian:bookworm-slim AS trusttunnel-endpoint
 ARG ENDPOINT_DIR_NAME="TrustTunnel"
 ARG LOG_LEVEL="info"
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates iproute2 && rm -rf /var/lib/apt/lists/*
 COPY --from=build /home/$ENDPOINT_DIR_NAME/target/release/setup_wizard /bin/
 COPY --from=build /home/$ENDPOINT_DIR_NAME/target/release/trusttunnel_endpoint /bin/
 COPY --chmod=755  /docker-entrypoint.sh /scripts/
 WORKDIR /trusttunnel_endpoint
+
+# Persist endpoint state/configuration under this directory:
+# - vpn.toml
+# - hosts.toml
+# - credentials.toml
+# - rules.toml
+# - certs/
 VOLUME /trusttunnel_endpoint/
-ENTRYPOINT ["sh", "/scripts/docker-entrypoint.sh"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD ss -ltn | grep -q ':8443 '
+ENTRYPOINT ["/scripts/docker-entrypoint.sh"]
 
