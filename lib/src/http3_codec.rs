@@ -491,10 +491,9 @@ impl pipe::Sink for StreamSink {
     }
 
     fn write(&mut self, data: Bytes) -> io::Result<Bytes> {
-        self.try_send_pending_response()?;
         if self.pending_response.is_some() {
             log_id!(
-                debug,
+                error,
                 self.id,
                 "Body write deferred: response headers not yet sent"
             );
