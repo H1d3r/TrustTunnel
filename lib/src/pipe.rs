@@ -70,9 +70,9 @@ pub(crate) trait Sink: Send {
     async fn wait_writable(&mut self) -> io::Result<()>;
 
     /// Flush all intermediately buffered contents.
-    /// By default, just waits for the writable state.
+    /// By default, does nothing.
     async fn flush(&mut self) -> io::Result<()> {
-        self.wait_writable().await
+        Ok(())
     }
 }
 
