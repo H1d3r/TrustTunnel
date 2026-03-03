@@ -541,7 +541,6 @@ impl pipe::Sink for StreamSink {
     }
 
     async fn wait_writable(&mut self) -> io::Result<()> {
-        self.consume_pending_response().await?;
         self.wait_body_capacity().await
     }
 }
