@@ -430,22 +430,6 @@ impl StreamSink {
         Ok(())
     }
 
-    async fn consume_pending_response(&mut self) -> io::Result<()> {
-        while self.pending_response.is_some() {
-            self.try_send_pending_response()?;
-            if self.pending_response.is_some() {
-                self.codec_tx
-                    .send(StreamMessage::WaitingWritable(self.stream_id))
-                    .map_err(|_| io::Error::from(ErrorKind::UnexpectedEof))?;
-                match self.writable_event_rx.recv().await {
-                    None => return Err(io::Error::from(ErrorKind::UnexpectedEof)),
-                    Some(_) => continue,
-                }
-            }
-        }
-        Ok(())
-    }
-
     async fn wait_body_capacity(&mut self) -> io::Result<()> {
         loop {
             match self.socket.stream_capacity(self.stream_id) {
@@ -542,6 +526,19 @@ impl pipe::Sink for StreamSink {
 
     async fn wait_writable(&mut self) -> io::Result<()> {
         self.wait_body_capacity().await
+    }
+
+    async fn flush(&mut self) -> io::Result<()> {
+        while self.pending_response.is_some() {
+            self.codec_tx
+                .send(StreamMessage::WaitingWritable(self.stream_id))
+                .map_err(|_| io::Error::from(ErrorKind::UnexpectedEof))?;
+            match self.writable_event_rx.recv().await {
+                None => return Err(io::Error::from(ErrorKind::UnexpectedEof)),
+                Some(_) => self.try_send_pending_response()?,
+            }
+        }
+        Ok(())
     }
 }
 
