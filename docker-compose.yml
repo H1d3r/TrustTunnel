@@ -12,6 +12,9 @@ services:
       # Required for Let's Encrypt HTTP-01 challenge (TT_CERT_TYPE=letsencrypt).
       # Remove this port if you do not issue/renew LE certificates in-container.
       - "80:80/tcp"
+    environment:
+      # Override if endpoint listens on a non-default container port.
+      - TT_HEALTHCHECK_PORT=8443
     volumes:
       - trusttunnel_endpoint_data:/trusttunnel_endpoint
 

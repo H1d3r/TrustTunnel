@@ -38,7 +38,8 @@ WORKDIR /trusttunnel_endpoint
 # - rules.toml
 # - certs/
 VOLUME /trusttunnel_endpoint/
+ENV TT_HEALTHCHECK_PORT=8443
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD ss -ltn | grep -q ':8443 '
+  CMD sh -c "ss -ltn | grep -q ':${TT_HEALTHCHECK_PORT:-8443} '"
 ENTRYPOINT ["/scripts/docker-entrypoint.sh"]
 
