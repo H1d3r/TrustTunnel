@@ -264,8 +264,7 @@ action = "deny"
 | `ping_path` | String | - | Optional path prefix for ping on main hosts |
 | `speedtest_path` | String | - | Optional path prefix for speedtest on main hosts |
 
-Ping and speedtest are matched only via their configured paths. If a path is not set,
-the corresponding handler will not match requests on main hosts.
+Ping and speedtest are matched only via their configured paths. Default paths are: `/ping` and `/speedtest`.
 
 ### Listen Protocol Settings
 
